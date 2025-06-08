@@ -1,0 +1,79 @@
+{
+  "skillCategories": [
+    {
+      "title": "DevOps & Cloud",
+      "skills": [
+        { "name": "CI/CD Pipeline Design", "level": 95 },
+        { "name": "Kubernetes", "level": 90 },
+        { "name": "Docker", "level": 92 },
+        { "name": "Terraform", "level": 88 },
+        { "name": "AWS", "level": 90 },
+        { "name": "Monitoring & Alerting", "level": 85 }
+      ]
+    },
+    {
+      "title": "Programming",
+      "skills": [
+        { "name": "Python", "level": 85 },
+        { "name": "Bash/Shell", "level": 90 },
+        { "name": "Go", "level": 75 },
+        { "name": "JavaScript", "level": 70 },
+        { "name": "YAML/JSON", "level": 95 },
+        { "name": "Git", "level": 88 }
+      ]
+    },
+    {
+      "title": "Cloud Platforms",
+      "skills": [
+        { "name": "Amazon Web Services", "level": 90 },
+        { "name": "Google Cloud Platform", "level": 82 },
+        { "name": "Microsoft Azure", "level": 78 },
+        { "name": "DigitalOcean", "level": 85 },
+        { "name": "Heroku", "level": 80 }
+      ]
+    },
+    {
+      "title": "Security & Compliance",
+      "skills": [
+        { "name": "HashiCorp Vault", "level": 88 },
+        { "name": "Security Scanning", "level": 85 },
+        { "name": "RBAC & IAM", "level": 90 },
+        { "name": "Compliance Automation", "level": 82 },
+        { "name": "Network Security", "level": 80 }
+      ]
+    }
+  ],
+  "tools": [
+    "Jenkins",
+    "GitHub Actions",
+    "CircleCI",
+    "ArgoCD",
+    "Prometheus",
+    "Grafana",
+    "ELK Stack",
+    "Ansible",
+    "Helm",
+    "GitLab CI",
+    "Datadog",
+    "New Relic",
+    "CloudFormation",
+    "Pulumi",
+    "Istio",
+    "Vault",
+    "Trivy",
+    "Falco",
+    "OPA",
+    "Jaeger",
+    "Loki",
+    "Tempo",
+    "Tekton",
+    "Velero",
+    "Cert-Manager",
+    "SPIFFE",
+    "Route 53",
+    "CloudFront",
+    "Apache Kafka",
+    "Redis",
+    "PostgreSQL"
+  ]
+} 

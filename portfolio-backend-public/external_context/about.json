@@ -1,0 +1,12 @@
+{
+
+    "journeyText": "After starting my tech journey in IT and network management roles in the IDF and the Tel Aviv Municipality, I completed my B.Sc. in Computer Science and dove into full-stack development. \n\nSelf-driven and always eager to learn, I transitioned to DevOps to bridge my passion for development and infrastructure. \n\nToday, I specialize in cloud automation, CI/CD, and infrastructure as code—designing robust solutions with tools like Kubernetes, Docker, Terraform, Jenkins, and AWS. I enjoy creative challenges, and I'm always looking for new ways to improve my skills and the systems I work with.",
+    "personalInterestsText": "Outside of tech, I love reading books, my pet cat, and playing basketball. I also enjoy exploring new trends in AI, DevOps and automation. Whether I'm learning something new or helping someone grow, I believe in continuous improvement—both in systems and in life.",
+    "whatIDoList": [
+    "Design and implement CI/CD pipelines (GitHub Actions, Jenkins)",
+    "Manage cloud infrastructure (AWS, GCP)",
+    "Container orchestration with Kubernetes",
+    "Infrastructure as Code with Terraform",
+    "Logging and Monitoring (EFK, Prometheus, Grafana)"
+  ]
+} 

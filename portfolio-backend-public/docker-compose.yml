@@ -1,0 +1,68 @@
+services:
+  backend:
+    image: portfolio-backend
+    container_name: portfolio-backend
+    restart: always
+    ports:
+      - "5000"
+    environment:
+      - MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/mydatabase?authSource=admin
+      # Redis Configuration
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      # Email Configuration
+      - EMAIL_ADDRESS=${EMAIL_ADDRESS}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - MY_EMAIL_ADDRESS=${MY_EMAIL_ADDRESS}
+      # Google gemini configuration
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_MODEL_NAME=${GOOGLE_MODEL_NAME}
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - frontend-network
+      - db-network
+      - redis-network
+
+  ui:
+    image: ${ECR_TAG_FRONT}:e2e-latest
+    container_name: portfolio-ui
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - frontend-network
+
+  mongo:
+    image: mongo:5.0
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - db-network
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+    restart: always
+    networks:
+      - redis-network
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+
+networks:
+  frontend-network:
+  db-network:
+  redis-network:
+  
+
+volumes:
+  mongo_data:

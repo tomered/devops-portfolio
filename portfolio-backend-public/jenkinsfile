@@ -1,0 +1,340 @@
+pipeline {
+    agent any
+
+    options{
+        gitLabConnection('cowsay-new')
+    }
+
+    environment {
+        ECR_TAG_BACK = credentials('ECR_TAG_BACK')
+        ECR_CONNECTION_BACK = credentials('ECR_CONNECTION_BACK')
+        ECR_TAG_FRONT = credentials('ECR_TAG_FRONT')
+        ECR_CONNECTION_FRONT = credentials('ECR_CONNECTION_FRONT')
+    }
+
+    stages {
+        
+        stage ("Determine Patch Version"){
+
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        return commitMessage.toLowerCase().contains("release")
+                    }
+                }
+            }
+            steps{
+                script{
+                    env.FAILED_STAGE = "Determine Patch Version"
+                    gitlabCommitStatus(name: 'Determine Patch Version'){
+                            echo "Found 'release:' in commit message — preparing tag."
+
+                           withCredentials([string(credentialsId: 'gitlab-token', variable: 'gitlab_connection')]) {
+                            sh """
+                                # Configure Git remote with token
+                                git remote set-url origin https://oauth2:${gitlab_connection}@gitlab.com/tomer-edelsberg/portfolio-backend.git
+                                git fetch --tags
+
+                                # Extract the desired major.minor from commit message (handles space before/after colon)
+                                MAJOR_MINOR=\$(git log -1 --pretty=%B | grep -oE "release[ ]*:[ ]*[0-9]+\\.[0-9]+" | grep -oE "[0-9]+\\.[0-9]+")
+                                
+                                # Trim any whitespace
+                                MAJOR_MINOR=\$(echo "\$MAJOR_MINOR" | xargs)
+
+                                if [ -z "\$MAJOR_MINOR" ]; then
+                                    echo "No major.minor specified in release commit."
+                                    exit 1
+                                fi
+
+                                MAJOR=\$(echo \$MAJOR_MINOR | cut -d. -f1)
+                                MINOR=\$(echo \$MAJOR_MINOR | cut -d. -f2)
+
+                                echo "Target release: \$MAJOR.\$MINOR"
+
+                                # Get the highest patch version for this major.minor
+                                PATCH=\$(git tag --list "v\$MAJOR.\$MINOR.*" | sed 's/^v//' | sort -V | tail -n1 | awk -F. '{print \$3}')
+                                
+                                if [ -z "\$PATCH" ]; then
+                                    PATCH=0
+                                else
+                                    PATCH=\$((PATCH + 1))
+                                fi
+
+                                FULL_VERSION="v\$MAJOR.\$MINOR.\$PATCH"
+                                echo "New tag: \$FULL_VERSION"
+
+                                # Export the version for downstream steps
+                                echo "FULL_VERSION=\$FULL_VERSION" > .env.jenkins
+                            """
+                        }
+
+                        // Load the version variable into the pipeline environment
+                        env.fullVersion = sh(script: "cat .env.jenkins | grep FULL_VERSION | cut -d'=' -f2", returnStdout: true).trim()
+                        echo "Version to tag: ${env.fullVersion}"
+                    }
+                }
+            }
+            
+        }
+
+        stage ("Build"){
+
+            when {
+                anyOf {
+                    branch 'main'
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
+            steps{
+                script{
+                    env.FAILED_STAGE = "Build"
+                    gitlabCommitStatus(name: 'Build'){
+                        sh 'docker build -f Dockerfile -t portfolio-backend-test --target test .'
+                        sh 'docker build -f Dockerfile -t portfolio-backend --target base .'
+                    }
+                }
+            }
+            
+        }
+
+
+        stage ("Test"){
+            when {
+                anyOf {
+                    branch 'main'
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
+            steps{
+                script{
+                    env.FAILED_STAGE = "Test"
+                    gitlabCommitStatus(name: 'Test'){
+                        sh 'docker run --rm portfolio-backend-test'
+                    }
+                }
+            }
+            
+        }
+
+
+
+        stage("Prepare Environment") {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
+            steps {
+                script {
+                    env.FAILED_STAGE = "Prepare Environment"
+                    gitlabCommitStatus(name: 'Prepare Environment') {
+                    withCredentials([string(credentialsId: 'ECR_TAG_FRONT', variable: 'ECR_TAG_FRONT')]) {
+                        sh '''
+                        #!/bin/sh
+                        set +x
+                        export AWS_PAGER=""
+
+                        echo "Fetching secret..."
+                        secret_json=$(aws secretsmanager get-secret-value --secret-id tomer-portfolio-env | jq -r '.SecretString')
+                        echo "Secret JSON fetched."
+
+                        if [ -z "$secret_json" ]; then
+                            echo "ERROR: Secret JSON is empty!"
+                            exit 1
+                        fi
+
+                        # Extract secrets using jq
+                        MONGO_USERNAME=$(echo "$secret_json" | jq -r '.MONGO_USERNAME_E2E')
+                        MONGO_PASSWORD=$(echo "$secret_json" | jq -r '.MONGO_PASSWORD')
+                        REDIS_PASSWORD=$(echo "$secret_json" | jq -r '.REDIS_PASSWORD')
+                        EMAIL_ADDRESS=$(echo "$secret_json" | jq -r '.EMAIL_ADDRESS')
+                        EMAIL_PASSWORD=$(echo "$secret_json" | jq -r '.EMAIL_PASSWORD')
+                        MY_EMAIL_ADDRESS=$(echo "$secret_json" | jq -r '.MY_EMAIL_ADDRESS')
+                        GOOGLE_API_KEY=$(echo "$secret_json" | jq -r '.GOOGLE_API_KEY')
+                        GOOGLE_MODEL_NAME=$(echo "$secret_json" | jq -r '.GOOGLE_MODEL_NAME')
+
+                        # Write the .env file
+                        cat > .env <<EOF
+                        MONGO_USERNAME=$MONGO_USERNAME
+                        MONGO_PASSWORD=$MONGO_PASSWORD
+                        REDIS_PASSWORD=$REDIS_PASSWORD
+                        EMAIL_ADDRESS=$EMAIL_ADDRESS
+                        EMAIL_PASSWORD=$EMAIL_PASSWORD
+                        MY_EMAIL_ADDRESS=$MY_EMAIL_ADDRESS
+                        GOOGLE_API_KEY=$GOOGLE_API_KEY
+                        GOOGLE_MODEL_NAME=$GOOGLE_MODEL_NAME
+                        ECR_TAG_FRONT=$ECR_TAG_FRONT
+                        EOF
+                            '''
+                        }
+
+                    }
+                }
+            }
+        }
+
+        stage ("E2E Tests"){
+            when {
+                anyOf {
+                    branch 'main'
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
+            steps{
+                script{
+                    env.FAILED_STAGE = "E2E Tests"
+                    gitlabCommitStatus(name: 'E2E Tests'){
+                       sh '''
+                            docker compose -f docker-compose.yml up -d
+
+                            docker build -f Dockerfile.test -t portfolio-e2e-tests .
+                            
+                            sleep 5s
+
+                            docker run --rm portfolio-e2e-tests
+                        '''
+
+                    }
+                }
+            }
+            
+        }
+
+
+
+        stage("Publish") {
+
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        return commitMessage.toLowerCase().contains("release")
+                    }
+                }
+            }
+
+            steps {
+                script{
+                 env.FAILED_STAGE = "Publish"
+                 gitlabCommitStatus(name: 'Publish'){
+                     sh """
+                        aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${ECR_CONNECTION_BACK}
+
+                        # Tag the image with both the version and latest
+                        docker tag portfolio-backend ${ECR_TAG_BACK}:${env.fullversion}
+                        docker tag portfolio-backend ${ECR_TAG_BACK}:latest
+
+                        # Push both tags
+                        docker push ${ECR_TAG_BACK}:${env.fullversion}
+                        docker push ${ECR_TAG_BACK}:latest
+                    """
+                }
+             }
+                
+            }
+            
+        }
+
+        stage('Deploy') {
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        return commitMessage.toLowerCase().contains("release")
+                    }
+                }
+            }
+            steps {
+                script {
+                    env.CURRENT_STAGE = 'Deploy'
+                    withCredentials([string(credentialsId: 'gitlab-token', variable: 'gitlab_connection')]) {
+                        sh """
+                            echo 'Cloning helm charts repo...'
+                            git clone https://oauth2:${gitlab_connection}@gitlab.com/tomer-edelsberg/gitops.git tomer-portfolio
+                            cd tomer-portfolio/tomer-portfolio
+                            echo 'Updating backend image tag in values.yaml...'
+                            sed -i '/app:/,/tag:/s#\\(tag:\\s*\\).*#\\1${env.fullversion}#' values.yaml
+                            git config user.email "jenkins@example.com"
+                            git config user.name "Jenkins CI"
+                            git add values.yaml
+                            git commit -m "Update backend image tag to ${env.fullversion}"
+                            git push https://oauth2:${gitlab_connection}@gitlab.com/tomer-edelsberg/gitops.git HEAD:main
+                        """
+                    }
+                }
+            }
+        }
+
+
+        stage("Git tag") {
+
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        return commitMessage.toLowerCase().contains("release")
+                    }
+                }
+            }
+
+            steps {
+                script{
+                    env.FAILED_STAGE = "git tag"
+                    withCredentials([string(credentialsId: 'gitlab-token', variable: 'gitlab_connection')]){
+                    gitlabCommitStatus(name: 'git tag'){
+                        
+                    sh """
+                            git tag ${env.fullVersion}
+                            git push https://oauth2:${gitlab_connection}@gitlab.com/tomer-edelsberg/portfolio-backend ${env.fullVersion}
+                            """
+                      
+                }
+                     }
+                }
+            }
+        
+            }
+
+
+    }
+
+
+    post {
+        success {
+            withCredentials([string(credentialsId: 'slack', variable: 'SLACK_WEBHOOK_URL')]) {
+                sh """
+                    curl -X POST -H 'Content-type: application/json' \\
+                        --data '{"text":"✅ *Build Succeeded* for `'$JOB_NAME'` #`'$BUILD_NUMBER'`"}' \\
+                        $SLACK_WEBHOOK_URL
+                """
+        }
+    }
+
+        failure {
+            withCredentials([string(credentialsId: 'slack', variable: 'SLACK_WEBHOOK_URL')]) {
+                sh """
+                    curl -X POST \\
+                            -H 'Content-type: application/json' \\
+                            --data '{\"text\":\"❌ *Build Failed* at stage: *$FAILED_STAGE* for $JOB_NAME #$BUILD_NUMBER\"}' \\
+                            $SLACK_WEBHOOK_URL
+                """
+
+        }
+    }
+        always {
+            echo 'Cleaning up Docker resources...'
+            sh 'docker network ls'
+            sh 'docker compose down -v'
+            sh 'docker container prune -f || true'
+            sh 'docker image prune -f || true'
+            sh 'rm -f .env'
+            sh 'rm -rf tomer-portfolio'
+        }
+    }
+}

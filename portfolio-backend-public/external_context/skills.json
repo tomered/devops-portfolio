@@ -1,0 +1,50 @@
+{
+  "skillCategories": [
+    {
+      "title": "DevOps & Cloud",
+      "skills": [
+        { "id": "cicd-pipeline", "name": "CI/CD Pipeline Design", "level": 95 },
+        { "id": "aws", "name": "AWS", "level": 95 },
+        { "id": "kubernetes", "name": "Kubernetes", "level": 95 },
+        { "id": "docker", "name": "Docker", "level": 100 },
+        { "id": "terraform", "name": "Terraform", "level": 88 },
+        { "id": "monitoring", "name": "Monitoring & Alerting", "level": 88 },
+        { "id": "gcp", "name": "GCP", "level": 85 }
+      ]
+    },
+    {
+      "title": "Programming & Coding",
+      "skills": [
+        { "id": "python", "name": "Python", "level": 90 },
+        { "id": "bash", "name": "Bash/Shell", "level": 90 },
+        { "id": "git", "name": "Git", "level": 88 },
+        { "id": "groovy", "name": "Groovy (Jenkins Pipelines)", "level": 86 },
+        { "id": "javascript", "name": "JavaScript", "level": 90 },
+        { "id": "html-css", "name": "HTML/CSS", "level": 80 },
+        { "id": "prompt-eng", "name": "Prompt Engineering", "level": 80 }
+      ]
+    }
+  ],
+  "tools": [
+    "Jenkins",
+    "GitHub Actions",
+    "ArgoCD",
+    "Prometheus",
+    "Grafana",
+    "EFK Stack",
+    "Bash",
+    "Python",
+    "Helm",
+    "Docker",
+    "Terraform",
+    "AWS",
+    "GCP",
+    "Vercel",
+    "Render",
+    "YAML/JSON",
+    "Git",
+    "Groovy (Jenkins Pipelines)",
+    "Lovable",
+    "Cursor"
+  ]
+} 

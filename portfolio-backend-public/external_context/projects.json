@@ -1,0 +1,51 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "title": "Interactive AI-Driven DevOps Portfolio",
+      "description": "Created a creative, interactive AI-based portfolio to showcase DevOps, CI/CD, and cloud infrastructure skills. Designed the application architecture: React frontend (served via Nginx), Flask backend, MongoDB database, and Redis for LLM rate limiting and load balancing. Collaborated with an AI Engineer, provided specs, and leveraged AI coding assistants (Lovable, Cursor). Deployed Gemini 2.0 flash-lite LLM on GCP. Infrastructure is provisioned on AWS using Terraform, built with Docker and Kubernetes (EKS), and uses Jenkins for CI/CD. Managed 4 repositories for frontend, backend, infrastructure, and GitOps with ArgoCD.",
+      "technologies": [
+        "React",
+        "Nginx",
+        "Flask",
+        "MongoDB",
+        "Redis",
+        "GCP",
+        "AWS",
+        "Terraform",
+        "Docker",
+        "Kubernetes",
+        "EKS",
+        "Jenkins",
+        "ArgoCD"
+      ],
+      "type": "Portfolio"
+    },
+    {
+      "id": 2,
+      "title": "Holon Institute of Technology Smart Campus Project",
+      "description": "Led a multidisciplinary team of 10+ developers and IT professionals to design and implement the Smart Campus project's architecture. Focused on user authentication and authorization, and managed comprehensive DevOps responsibilities, including monolithic application deployment.",
+      "technologies": [
+        "DevOps",
+        "Team Leadership",
+        "Authentication",
+        "Authorization",
+        "Application Deployment"
+      ],
+      "type": "Industry Collaboration"
+    },
+    {
+      "id": 3,
+      "title": "Pathfinding Visualizer Web Application",
+      "description": "Developed an independent, full-stack web application to visualize pathfinding algorithms. Built with React and Material-UI (MUI) for the frontend and Redux Toolkit (RTK) for state management. Implemented backend services in Node.js and MongoDB to manage persistent data.",
+      "technologies": [
+        "React",
+        "Material-UI (MUI)",
+        "Redux Toolkit (RTK)",
+        "Node.js",
+        "MongoDB"
+      ],
+      "type": "Personal Project"
+    }
+  ]
+}
