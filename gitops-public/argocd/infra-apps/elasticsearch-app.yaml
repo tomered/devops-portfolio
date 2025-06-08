@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+  source:
+    repoURL: https://helm.elastic.co
+    chart: elasticsearch
+    targetRevision: 7.17.3
+    helm:
+      values: | 
+        minimumMasterNodes: 1
+        replicas: 1
+
+        volumeClaimTemplate:
+          resources:  
+            requests: 
+              storage: 8Gi
+          storageClassName: gp2-csi
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "512M"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+        - CreateNamespace=true

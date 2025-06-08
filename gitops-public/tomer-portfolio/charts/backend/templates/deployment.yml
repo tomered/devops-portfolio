@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}-deployment
+  namespace: {{ .Values.backNamespace }}
+  labels:
+    app: {{ .Values.app.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+    spec:
+      containers:
+        - name: {{ .Values.app.name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongoSecret }}
+                  key: {{ .Values.secrets.mongoUsernameKey }}
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongoSecret }}
+                  key: {{ .Values.secrets.mongoPasswordKey }}
+            - name: MONGO_URI
+              value: "{{ .Values.mongoUri }}"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.redisSecret }}
+                  key: {{ .Values.secrets.redisPasswordKey }}
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.redisSecret }}
+                  key: {{ .Values.secrets.redisHostKey }}
+            - name: EMAIL_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.emailSecret }}
+                  key: {{ .Values.secrets.emailAddressKey }}
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.emailSecret }}
+                  key: {{ .Values.secrets.emailPasswordKey }}
+            - name: MY_EMAIL_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.emailSecret }}
+                  key: {{ .Values.secrets.myEmailAddressKey }}
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.modelSecret }}
+                  key: {{ .Values.secrets.googleApiKey }}
+            - name: GOOGLE_MODEL_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.modelSecret }}
+                  key: {{ .Values.secrets.googleModelName }}
+
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/readyz
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3

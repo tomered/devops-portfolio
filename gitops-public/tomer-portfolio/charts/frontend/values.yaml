@@ -1,0 +1,13 @@
+frontend:
+  namespace: portfolio-ui
+  frontApp:
+    name: portfolio-ui
+    replicaCount: 1
+    image:
+      repository: 793786247026.dkr.ecr.ap-south-1.amazonaws.com/tomer-portfolio-ui
+      tag: latest
+    securityContext:
+      runAsUser: 0
+    service:
+      port: 80
+      type: ClusterIP

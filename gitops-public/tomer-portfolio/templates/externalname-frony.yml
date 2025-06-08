@@ -1,0 +1,14 @@
+{{- if .Values.ingress.externalNameFrontend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontend.frontApp.name }}-service
+  namespace: {{ .Values.ingress.namespace }}
+spec:
+  type: ExternalName
+  externalName: {{ .Values.frontend.frontApp.name }}-service.{{ .Values.frontend.namespace }}.svc.cluster.local
+  ports:
+    - name: http
+      port: {{ .Values.frontend.frontApp.service.port }}
+      targetPort: {{ .Values.frontend.frontApp.service.port }}
+{{- end }}

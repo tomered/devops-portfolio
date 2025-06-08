@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tomer-portfolio
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+  source:
+    repoURL: git@gitlab.com:tomer-edelsberg/gitops.git
+    path: tomer-portfolio
+    helm:
+      valueFiles:
+        - values.yaml
+    targetRevision: main
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: default
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+        - CreateNamespace=true

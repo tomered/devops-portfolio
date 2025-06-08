@@ -1,0 +1,161 @@
+# Backend
+
+app:
+  name: portfolio-backend
+
+backNamespace: portfolio-backend
+
+replicaCount: 2
+
+image:
+  repository: 793786247026.dkr.ecr.ap-south-1.amazonaws.com/tomer-portfolio-backend
+  tag: v1.1.0
+
+service:
+  port: 5000
+
+mongoUri: "mongodb://$(MONGO_USERNAME):$(MONGO_PASSWORD)@tomer-portfolio-mongodb-headless.mongodb.svc.cluster.local:27017/mydatabase?authSource=admin"
+
+
+secrets:
+  mongoSecret: mongo-secret
+  mongoUsernameKey: MONGO_USERNAME
+  mongoPasswordKey: MONGO_PASSWORD
+  redisSecret: redis-secret
+  redisPasswordKey: REDIS_PASSWORD
+  redisHostKey: REDIS_HOST
+  emailSecret: email-secret
+  emailAddressKey: EMAIL_ADDRESS
+  emailPasswordKey: EMAIL_PASSWORD
+  myEmailAddressKey: MY_EMAIL_ADDRESS
+  modelSecret: model-secret
+  googleApiKey: GOOGLE_API_KEY
+  googleModelName: GOOGLE_MODEL_NAME
+
+
+# Backend service
+
+service:
+  port: 5000
+  type: ClusterIP
+
+
+# Frontend 
+
+frontend:
+  namespace: portfolio-ui
+  frontApp:
+    name: portfolio-ui
+    replicaCount: 1
+    image:
+      repository: 793786247026.dkr.ecr.ap-south-1.amazonaws.com/tomer-portfolio-ui
+      tag: v1.0.1
+    securityContext:
+      runAsUser: 0
+    service:
+      port: 80
+      type: ClusterIP
+
+# Ingress
+
+ingress:
+  name: portfolio-ui-ingress
+  host: tomer-portfolio.freedynamicdns.net
+  namespace: ingress-nginx
+  externalNameBackend:
+    enabled: true
+  externalNameFrontend:
+    enabled: true
+
+
+chartName: Tomer-Portfolio
+
+# ClusterIssuer
+
+clusterIssuer:
+  name: tomer-portfolio-issuer
+  email: tomeredel@gmail.com
+  server: "https://acme-v02.api.letsencrypt.org/directory"
+  ingressClassName: nginx
+
+serviceAccount:
+  create: true
+
+  
+# Mongodb
+
+mongodb:
+  namespaceOverride: mongodb
+  architecture: replicaset
+  replicaCount: 3
+  replicaSetName: rs0
+
+  auth:
+    enabled: true
+    existingSecret: mongodb-secret
+    existingSecretUsernameKey: mongodb-root-username
+    existingSecretPasswordKey: mongodb-root-password
+    existingSecretReplicaSetKeyKey: mongodb-replica-set-key
+    username: root
+    database: mydatabase
+
+
+  persistence.enabled: true
+  persistence.size: 8Gi
+  persistence.accessModes[0]: ReadWriteOnce
+  persistence.storageClass: gp2-csi
+
+  persistence:
+    storageClass: gp2-csi
+    storageClassName: gp2-csi
+
+  useStatefulSet: true
+
+  service.type: ClusterIP
+  service.clusterIP: None
+  service.portName: mongodb
+  service.ports.mongodb: 27017
+
+  resources.requests.cpu: 500m
+  resources.requests.memory: 512Mi
+  resources.limits.cpu: 1
+  resources.limits.memory: 1Gi
+
+global:
+  namespaceOverride: mongodb
+
+
+# Redis
+
+redis:
+  namespaceOverride: portfolio-backend
+  architecture: standalone
+  useStatefulSet: true
+
+  auth:
+    enabled: true
+    existingSecret: redis-secret
+    existingSecretPasswordKey: REDIS_PASSWORD
+
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: gp2-csi
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  service:
+    type: ClusterIP
+    port: 6379
+
+# Ingress-nginx
+
+ingress-nginx:
+  namespaceOverride: ingress-nginx

@@ -1,0 +1,7 @@
+# Kubernetes secrets directory
+secrets/ 
+
+tomer-portfolio/charts/*.tgz
+Chart.lock
+
+/argocd/secret.yml

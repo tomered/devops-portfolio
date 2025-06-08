@@ -1,0 +1,14 @@
+  configs:
+    secret:
+      argocdServerAdminPassword: $2y$10$8UH7oCCgy5W.RtMOs5jSVeROeQt6PKWYDtPvVkLE.gj01zKOcGeRa
+    params:
+      server.insecure: true
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - argocd.example.com
+      paths:
+        - /
+      tls: []

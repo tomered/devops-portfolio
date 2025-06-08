@@ -1,0 +1,42 @@
+# Backend
+
+app:
+  name: portfolio-backend
+
+backNamespace: portfolio-backend
+
+replicaCount: 2
+
+image:
+  repository: 793786247026.dkr.ecr.ap-south-1.amazonaws.com/tomer-portfolio-backend
+  tag: latest
+
+service:
+  port: 5000
+
+mongoUri: "mongodb://$(MONGO_USERNAME):$(MONGO_PASSWORD)@tomer-portfolio-mongodb-headless.mongodb.svc.cluster.local:27017/mydatabase?authSource=admin"
+
+secrets:
+  mongoSecret: mongo-secret
+  mongoUsernameKey: MONGO_USERNAME
+  mongoPasswordKey: MONGO_PASSWORD
+  redisSecret: redis-secret
+  redisPasswordKey: REDIS_PASSWORD
+  redisHostKey: REDIS_HOST
+  emailSecret: email-secret
+  emailAddressKey: EMAIL_ADDRESS
+  emailPasswordKey: EMAIL_PASSWORD
+  myEmailAddressKey: MY_EMAIL_ADDRESS
+  modelSecret: model-secret
+  googleApiKey: GOOGLE_API_KEY
+  googleModelName: GOOGLE_MODEL_NAME
+
+
+# Backend service
+
+service:
+  port: 5000
+  type: ClusterIP
+
+
+
