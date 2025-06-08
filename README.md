@@ -53,6 +53,24 @@ This diagram demonstrates the AWS cloud infrastructure, featuring:
 - Load balancing and security
 - Managed services integration
 
+### Monitoring Architecture
+![Monitoring Architecture](docs/images/monitoring.png)
+
+This diagram illustrates the monitoring infrastructure, featuring:
+- Prometheus metrics collection
+- Grafana dashboards
+- Service and infrastructure monitoring
+- Performance metrics visualization
+
+### Logging Architecture
+![Logging Architecture](docs/images/logging.png)
+
+This diagram shows the logging infrastructure, featuring:
+- EFK Stack implementation
+- Log aggregation with Fluent Bit
+- Elasticsearch storage and indexing
+- Kibana visualization and analysis
+
 ## Repository Structure
 
 ```
