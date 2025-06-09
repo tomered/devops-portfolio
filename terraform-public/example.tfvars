@@ -60,10 +60,6 @@ tags = {
   expiration_date = "yyyy-mm-dd"
 }
 
-# External Secrets Configuration
-namespace = "external-secrets"           # Namespace for External Secrets Operator
-service_account_name = "external-secrets-sa"  # Service account name
-
 # ArgoCD Configuration
 argocd_namespace = "argocd"  # Namespace for ArgoCD
 

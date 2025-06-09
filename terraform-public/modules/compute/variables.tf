@@ -14,7 +14,7 @@ variable "vpc_id" {
 }
 
 variable "allowed_ingress_ports" {
-  type = list(string)
+  type        = list(string)
 }
 
 variable "subnet_ids" {
@@ -37,13 +37,13 @@ variable "eks_instance_type" {
 }
 
 variable "eks_min_size" {
-  type    = number
+  type        = number
 }
 
 variable "eks_max_size" {
-  type    = number
+  type        = number
 }
 
 variable "tags"{
-  type = map(string)
+  type        = map(string)
 }

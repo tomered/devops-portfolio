@@ -30,15 +30,6 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_policy" {
   role       = aws_iam_role.ebs_csi.name
 }
 
-# Helm provider using dynamic cluster info
-# provider "helm" {
-#   kubernetes {
-#     host                   = var.eks_cluster_endpoint
-#     cluster_ca_certificate = base64decode(var.eks_cluster_certificate_authority)
-#     token                  = var.eks_token
-#   }
-# }
-
 # Deploy AWS EBS CSI Driver via Helm
 resource "helm_release" "aws_ebs_csi_driver" {
   name       = "aws-ebs-csi-driver"

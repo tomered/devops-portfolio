@@ -93,37 +93,6 @@ variable "eks_max_size" {
 }
 
 
-// eks-irsa-external-secrets
-variable "namespace" {
-  description = "Namespace for External Secrets Operator"
-  type        = string
-}
-
-variable "service_account_name" {
-  description = "Service account name for ESO"
-  type        = string
-  default     = "external-secrets-sa"
-}
-
-variable "external_secrets_config" {
-  description = "Configuration for external-secrets"
-  type = object({
-    name       = string
-    namespace  = string
-    chart      = string
-    repository = string
-    version    = string
-  })
-  default = {
-    name       = "external-secrets"
-    namespace  = "external-secrets"
-    chart      = "external-secrets"
-    repository = "https://charts.external-secrets.io"
-    version    = "0.9.9"
-  }
-}
-
-
 // argocd
 
 variable "argocd_namespace" {

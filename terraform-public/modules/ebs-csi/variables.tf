@@ -7,7 +7,7 @@ variable "oidc_issuer_url" {
 }
 
 variable "eks_cluster_endpoint" {
-     type = string 
+    type = string 
 }
 
 variable "eks_cluster_certificate_authority" { 
@@ -15,13 +15,13 @@ variable "eks_cluster_certificate_authority" {
 }
 
 variable "eks_token" {
-     type = string 
+    type = string 
 }
 
 variable "oidc_provider_arn" {
-  type = string
+    type = string
 }
 
 variable "tags" {
-     type = map(string) 
+    type = map(string) 
 }
